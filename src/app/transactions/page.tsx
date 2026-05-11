@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import API from "@/services/api";
 import axios from "axios";
 
@@ -14,27 +14,39 @@ type Transaction = {
   note?: string;
 };
 
+type FormState = {
+  title: string;
+  amount: string;
+  categoryName: string;
+  type: string;
+  transactionDate: string;
+  note: string;
+};
+
+const emptyForm: FormState = {
+  title: "",
+  amount: "",
+  categoryName: "",
+  type: "EXPENSE",
+  transactionDate: "",
+  note: "",
+};
+
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [form, setForm] = useState({
-    title: "",
-    amount: "",
-    categoryName: "",
-    type: "EXPENSE",
-    transactionDate: "",
-    note: "",
-  });
+  const [form, setForm] = useState<FormState>(emptyForm);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   const [filterType, setFilterType] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const fetchTransactions = useCallback(async () => {
+  const fetchTransactions = async () => {
     try {
-      const res = await API.get<Transaction[]>("/transactions");
+      const res = await API.get("/transactions");
       setTransactions(res.data);
     } catch (error: unknown) {
       console.error(error);
@@ -42,7 +54,7 @@ export default function TransactionsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -50,38 +62,50 @@ export default function TransactionsPage() {
     }, 0);
 
     return () => clearTimeout(t);
-  }, [fetchTransactions]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      await API.post("/transactions", {
+      const payload = {
         ...form,
         amount: Number(form.amount),
-      });
+      };
 
-      setForm({
-        title: "",
-        amount: "",
-        categoryName: "",
-        type: "EXPENSE",
-        transactionDate: "",
-        note: "",
-      });
+      if (editingId) {
+        await API.put(`/transactions/${editingId}`, payload);
+      } else {
+        await API.post("/transactions", payload);
+      }
 
+      setForm(emptyForm);
+      setEditingId(null);
       fetchTransactions();
     } catch (error: unknown) {
       const message = axios.isAxiosError(error)
         ? error.response?.data?.message ||
           error.response?.data ||
-          "Failed to create transaction"
-        : "Failed to create transaction";
+          "Failed to save transaction"
+        : "Failed to save transaction";
 
       alert(
-        typeof message === "string" ? message : "Failed to create transaction",
+        typeof message === "string" ? message : "Failed to save transaction",
       );
     }
+  };
+
+  const handleEdit = (tx: Transaction) => {
+    setEditingId(tx.id);
+    setForm({
+      title: tx.title,
+      amount: String(tx.amount),
+      categoryName: tx.categoryName,
+      type: tx.type,
+      transactionDate: tx.transactionDate,
+      note: tx.note || "",
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDelete = async (id: number) => {
@@ -101,58 +125,39 @@ export default function TransactionsPage() {
     }
   };
 
+  const resetForm = () => {
+    setForm(emptyForm);
+    setEditingId(null);
+  };
+
   const filterByType = async () => {
     try {
-      const res = await API.get<Transaction[]>(
-        `/transactions/filter/type?type=${encodeURIComponent(filterType)}`,
-      );
+      const res = await API.get(`/transactions/filter/type?type=${filterType}`);
       setTransactions(res.data);
-    } catch (error: unknown) {
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.message ||
-          error.response?.data ||
-          "Filter failed"
-        : "Filter failed";
-
-      alert(typeof message === "string" ? message : "Filter failed");
+    } catch {
+      alert("Type filter failed");
     }
   };
 
   const filterByCategory = async () => {
     try {
-      const res = await API.get<Transaction[]>(
-        `/transactions/filter/category?categoryName=${encodeURIComponent(
-          filterCategory,
-        )}`,
+      const res = await API.get(
+        `/transactions/filter/category?categoryName=${filterCategory}`,
       );
       setTransactions(res.data);
-    } catch (error: unknown) {
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.message ||
-          error.response?.data ||
-          "Filter failed"
-        : "Filter failed";
-
-      alert(typeof message === "string" ? message : "Filter failed");
+    } catch {
+      alert("Category filter failed");
     }
   };
 
   const filterByDate = async () => {
     try {
-      const res = await API.get<Transaction[]>(
-        `/transactions/filter/date?startDate=${encodeURIComponent(
-          startDate,
-        )}&endDate=${encodeURIComponent(endDate)}`,
+      const res = await API.get(
+        `/transactions/filter/date?startDate=${startDate}&endDate=${endDate}`,
       );
       setTransactions(res.data);
-    } catch (error: unknown) {
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.message ||
-          error.response?.data ||
-          "Filter failed"
-        : "Filter failed";
-
-      alert(typeof message === "string" ? message : "Filter failed");
+    } catch {
+      alert("Date filter failed");
     }
   };
 
@@ -161,7 +166,7 @@ export default function TransactionsPage() {
     setFilterCategory("");
     setStartDate("");
     setEndDate("");
-    void fetchTransactions();
+    fetchTransactions();
   };
 
   if (loading) return <div>Loading...</div>;
@@ -170,10 +175,80 @@ export default function TransactionsPage() {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Transactions</h1>
 
+      {/* Filters */}
+      <div className="bg-white p-4 rounded shadow space-y-4">
+        <h2 className="text-xl font-semibold">Filters</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <input
+            className="border p-2 rounded"
+            placeholder="Filter by category"
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+          />
+
+          <select
+            className="border p-2 rounded"
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+          >
+            <option value="">Select Type</option>
+            <option value="INCOME">INCOME</option>
+            <option value="EXPENSE">EXPENSE</option>
+          </select>
+
+          <input
+            className="border p-2 rounded"
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+
+          <input
+            className="border p-2 rounded"
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={filterByType}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Filter Type
+          </button>
+          <button
+            onClick={filterByCategory}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Filter Category
+          </button>
+          <button
+            onClick={filterByDate}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Filter Date
+          </button>
+          <button
+            onClick={resetFilters}
+            className="bg-gray-600 text-white px-4 py-2 rounded"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+      {/* Form */}
       <form
         onSubmit={handleSubmit}
         className="bg-white p-4 rounded shadow space-y-4"
       >
+        <h2 className="text-xl font-semibold">
+          {editingId ? "Edit Transaction" : "Add Transaction"}
+        </h2>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             className="border p-2 rounded"
@@ -218,79 +293,24 @@ export default function TransactionsPage() {
           />
         </div>
 
-        <button className="bg-black text-white px-4 py-2 rounded">
-          Add Transaction
-        </button>
+        <div className="flex gap-3">
+          <button className="bg-black text-white px-4 py-2 rounded">
+            {editingId ? "Update Transaction" : "Add Transaction"}
+          </button>
+
+          {editingId && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="bg-gray-500 text-white px-4 py-2 rounded"
+            >
+              Cancel Edit
+            </button>
+          )}
+        </div>
       </form>
 
-      <div className="bg-white p-4 rounded shadow">
-        <h3 className="font-semibold mb-2">Filters</h3>
-        <div className="flex flex-wrap gap-2 items-center">
-          <select
-            className="border p-2 rounded"
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-          >
-            <option value="">All Types</option>
-            <option value="INCOME">INCOME</option>
-            <option value="EXPENSE">EXPENSE</option>
-          </select>
-
-          <input
-            className="border p-2 rounded"
-            placeholder="Category"
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-          />
-
-          <input
-            className="border p-2 rounded"
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-
-          <input
-            className="border p-2 rounded"
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-
-          <button
-            type="button"
-            onClick={filterByType}
-            className="bg-blue-600 text-white px-3 py-1 rounded"
-          >
-            By Type
-          </button>
-
-          <button
-            type="button"
-            onClick={filterByCategory}
-            className="bg-blue-600 text-white px-3 py-1 rounded"
-          >
-            By Category
-          </button>
-
-          <button
-            type="button"
-            onClick={filterByDate}
-            className="bg-blue-600 text-white px-3 py-1 rounded"
-          >
-            By Date
-          </button>
-
-          <button
-            type="button"
-            onClick={resetFilters}
-            className="bg-gray-600 text-white px-3 py-1 rounded"
-          >
-            Reset
-          </button>
-        </div>
-      </div>
-
+      {/* Table */}
       <div className="bg-white rounded shadow overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-100">
@@ -311,7 +331,13 @@ export default function TransactionsPage() {
                 <td className="p-3">{tx.categoryName}</td>
                 <td className="p-3">{tx.type}</td>
                 <td className="p-3">{tx.transactionDate}</td>
-                <td className="p-3">
+                <td className="p-3 flex gap-2">
+                  <button
+                    onClick={() => handleEdit(tx)}
+                    className="bg-yellow-500 text-white px-3 py-1 rounded"
+                  >
+                    Edit
+                  </button>
                   <button
                     onClick={() => handleDelete(tx.id)}
                     className="bg-red-500 text-white px-3 py-1 rounded"
