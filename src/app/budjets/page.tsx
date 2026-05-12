@@ -51,6 +51,7 @@ export default function BudgetsPage() {
     (sum, budget) => sum + budget.remainingAmount,
     0,
   );
+  const overspent = totalRemaining < 0;
 
   const fetchBudgets = async () => {
     try {
@@ -131,51 +132,79 @@ export default function BudgetsPage() {
     setEditingId(null);
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-slate-50 via-zinc-50 to-emerald-50 pb-10">
+        <div className="mx-auto flex min-h-screen max-w-7xl items-center justify-center px-4">
+          <div className="rounded-3xl border border-white/70 bg-white/80 px-8 py-10 text-center shadow-[0_24px_80px_-32px_rgba(15,23,42,0.35)] backdrop-blur">
+            <div className="mx-auto mb-4 h-14 w-14 animate-pulse rounded-2xl bg-linear-to-br from-emerald-500 to-cyan-500" />
+            <p className="text-lg font-semibold text-zinc-950">
+              Loading budgets
+            </p>
+            <p className="mt-1 text-sm text-zinc-500">
+              Preparing your budget overview and spending insights...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-zinc-50 to-emerald-50 pb-10">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-8">
-        <div className="overflow-hidden rounded-3xl border border-white/70 bg-white/80 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.35)] backdrop-blur">
+        <div className="overflow-hidden rounded-[2rem] border border-white/70 bg-white/80 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.35)] backdrop-blur">
           <div className="relative px-6 py-7 sm:px-8 sm:py-8">
             <div className="absolute inset-0 bg-linear-to-r from-emerald-500/5 via-transparent to-cyan-500/10" />
+            <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-emerald-300/20 blur-3xl" />
+            <div className="absolute bottom-0 left-24 h-32 w-32 rounded-full bg-cyan-300/20 blur-3xl" />
             <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                   Budget planning
                 </div>
-                <h1 className="mt-4 text-3xl font-black tracking-tight text-zinc-950 sm:text-4xl">
-                  Control spending with clear budget goals.
+                <h1 className="mt-4 text-3xl font-black tracking-tight text-zinc-950 sm:text-5xl">
+                  Control spending with clear, beautiful budget goals.
                 </h1>
                 <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-600 sm:text-base">
                   Create monthly budgets, watch progress in real time, and keep
                   every category easy to understand.
                 </p>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <span className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-semibold text-zinc-600 shadow-sm">
+                    {budgets.length} active budgets
+                  </span>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${overspent ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"}`}
+                  >
+                    {overspent ? "Over budget" : "On track"}
+                  </span>
+                </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3 sm:gap-4 lg:min-w-105">
-                <div className="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:min-w-105">
+                <div className="rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white px-4 py-4 shadow-sm">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">
                     Total Budget
                   </p>
-                  <p className="mt-1 text-lg font-bold text-blue-950">
+                  <p className="mt-2 text-2xl font-black text-blue-950">
                     {formatCurrency(totalBudget)}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-rose-700">
+                <div className="rounded-3xl border border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-4 shadow-sm">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-700">
                     Spent
                   </p>
-                  <p className="mt-1 text-lg font-bold text-rose-950">
+                  <p className="mt-2 text-2xl font-black text-rose-950">
                     {formatCurrency(totalSpent)}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 shadow-sm">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                <div className="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white px-4 py-4 shadow-sm">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
                     Remaining
                   </p>
                   <p
-                    className={`mt-1 text-lg font-bold ${totalRemaining >= 0 ? "text-emerald-950" : "text-rose-700"}`}
+                    className={`mt-2 text-2xl font-black ${totalRemaining >= 0 ? "text-emerald-950" : "text-rose-700"}`}
                   >
                     {formatCurrency(Math.abs(totalRemaining))}
                   </p>
@@ -187,7 +216,7 @@ export default function BudgetsPage() {
 
         <form
           onSubmit={handleSubmit}
-          className="rounded-3xl border border-zinc-200 bg-white/95 p-6 shadow-sm sm:p-7"
+          className="rounded-[2rem] border border-zinc-200 bg-white/95 p-6 shadow-sm sm:p-7"
         >
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -268,7 +297,7 @@ export default function BudgetsPage() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {budgets.length === 0 ? (
-            <div className="col-span-full rounded-3xl border border-dashed border-zinc-200 bg-white/80 px-6 py-14 text-center shadow-sm">
+            <div className="col-span-full rounded-[2rem] border border-dashed border-zinc-200 bg-white/80 px-6 py-14 text-center shadow-sm">
               <div className="mx-auto max-w-sm">
                 <h3 className="text-lg font-semibold text-zinc-950">
                   No budgets yet
@@ -283,7 +312,7 @@ export default function BudgetsPage() {
             budgets.map((budget) => (
               <div
                 key={budget.id}
-                className="group rounded-3xl border border-zinc-200 bg-white/95 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-200/60"
+                className="group rounded-[2rem] border border-zinc-200 bg-white/95 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-200/60"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -337,6 +366,11 @@ export default function BudgetsPage() {
                       }}
                     />
                   </div>
+                  <p className="mt-3 text-xs leading-5 text-zinc-500">
+                    {budget.status === "EXCEEDED"
+                      ? "This budget has gone over the planned amount."
+                      : "Spending is within the planned limit for this category."}
+                  </p>
                 </div>
 
                 <div className="mt-5 flex gap-3">
