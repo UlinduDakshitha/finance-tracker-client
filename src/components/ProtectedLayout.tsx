@@ -3,13 +3,19 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function HomePage() {
+export default function ProtectedLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    router.replace(token ? "/dashboard" : "/login");
+    if (!token) {
+      router.replace("/login");
+    }
   }, [router]);
 
-  return <div className="p-6">Loading...</div>;
+  return <>{children}</>;
 }
