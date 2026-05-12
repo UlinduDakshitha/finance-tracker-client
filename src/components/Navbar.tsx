@@ -1,24 +1,82 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
+type Profile = {
+  name: string;
+  email: string;
+};
+
+function decodeTokenProfile(token: string): Profile {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) {
+      return { name: "Profile", email: "Signed in" };
+    }
+
+    const parsed = JSON.parse(atob(payload)) as {
+      name?: string;
+      email?: string;
+      sub?: string;
+      username?: string;
+    };
+
+    return {
+      name: parsed.name || parsed.username || parsed.email || "Profile",
+      email: parsed.email || parsed.sub || "Signed in",
+    };
+  } catch {
+    return { name: "Profile", email: "Signed in" };
+  }
+}
 
 export default function Navbar() {
   const router = useRouter();
+  const [profile, setProfile] = useState<Profile>({
+    name: "Profile",
+    email: "Signed in",
+  });
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setProfile(decodeTokenProfile(token));
+    }
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    router.push("/login");
+    router.replace("/login");
   };
 
   return (
-    <header className="flex justify-between items-center px-6 py-4 bg-white border-b">
-      <h2 className="text-lg font-semibold">Dashboard</h2>
-      <button
-        onClick={handleLogout}
-        className="px-4 py-2 rounded bg-red-500 text-white"
-      >
-        Logout
-      </button>
+    <header className="flex items-center justify-between gap-4 px-6 py-4 bg-white border-b">
+      <div>
+        <h2 className="text-lg font-semibold">Dashboard</h2>
+        <p className="text-sm text-gray-500">Overview and account controls</p>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 rounded-full border px-4 py-2 bg-gray-50">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-white text-sm font-semibold">
+            {profile.name.slice(0, 1).toUpperCase()}
+          </div>
+          <div className="leading-tight">
+            <p className="text-sm font-semibold text-gray-900">
+              {profile.name}
+            </p>
+            <p className="text-xs text-gray-500">{profile.email}</p>
+          </div>
+        </div>
+
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600"
+        >
+          Logout
+        </button>
+      </div>
     </header>
   );
 }

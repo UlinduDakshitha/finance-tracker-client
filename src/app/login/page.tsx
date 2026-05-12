@@ -16,7 +16,7 @@ export default function LoginPage() {
     try {
       const res = await API.post("/auth/login", { email, password });
       localStorage.setItem("token", res.data.token);
-      router.push("/dashboard");
+      router.replace("/dashboard");
     } catch (error: unknown) {
       const message = axios.isAxiosError(error)
         ? error.response?.data?.message ||

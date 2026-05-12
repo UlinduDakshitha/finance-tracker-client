@@ -17,7 +17,7 @@ export default function RegisterPage() {
     try {
       const res = await API.post("/auth/register", { name, email, password });
       localStorage.setItem("token", res.data.token);
-      router.push("/dashboard");
+      router.replace("/dashboard");
     } catch (error: unknown) {
       const message = axios.isAxiosError(error)
         ? error.response?.data?.message ||
