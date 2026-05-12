@@ -68,10 +68,10 @@ export default function Navbar() {
           </div>
           <div className="leading-tight">
             <p className="text-sm font-semibold text-gray-900">
-              {profile.name}
+              {profile.email}
             </p>
-            {profile.email && (
-              <p className="text-xs text-gray-500">{profile.email}</p>
+            {profile.name && (
+              <p className="text-xs text-gray-500">{profile.name}</p>
             )}
           </div>
         </div>
