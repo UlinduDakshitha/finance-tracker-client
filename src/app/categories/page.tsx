@@ -66,14 +66,12 @@ export default function CategoriesPage() {
       setForm(emptyForm);
       setEditingId(null);
       fetchCategories();
-    } catch (error: unknown) {
-      const message = axios.isAxiosError(error)
-        ? error.response?.data?.message ||
-          error.response?.data ||
-          "Failed to save category"
-        : "Failed to save category";
-
-      alert(typeof message === "string" ? message : "Failed to save category");
+    } catch (err: any) {
+      const message =
+        err.response?.data?.message ||
+        err.response?.data ||
+        "Something went wrong";
+      alert(message);
     }
   };
 

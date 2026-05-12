@@ -68,6 +68,9 @@ export default function DashboardPage() {
     router.replace("/login");
   };
 
+  const formatCurrency = (value: number) =>
+    `Rs ${value.toLocaleString("en-LK")}`;
+
   if (loading) {
     return <div className="p-6 text-lg">Loading dashboard...</div>;
   }
@@ -113,13 +116,22 @@ export default function DashboardPage() {
                 Welcome back! Your financial overview awaits.
               </p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-zinc-500">Balance</p>
-              <p
-                className={`text-2xl font-bold ${(data.balance ?? 0) >= 0 ? "text-green-600" : "text-red-600"}`}
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-sm text-zinc-500">Balance</p>
+                <p
+                  className={`text-2xl font-bold ${(data.balance ?? 0) >= 0 ? "text-green-600" : "text-red-600"}`}
+                >
+                  {formatCurrency(data.balance || 0)}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 shadow-sm transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
               >
-                Rs{data.balance?.toLocaleString() || "0"}
-              </p>
+                Logout
+              </button>
             </div>
           </div>
         </div>
@@ -154,7 +166,7 @@ export default function DashboardPage() {
               Total Income
             </p>
             <h2 className="text-3xl font-bold text-green-900">
-              Rs{data.totalIncome?.toLocaleString() || "0"}
+              {formatCurrency(data.totalIncome || 0)}
             </h2>
             <p className="text-xs text-green-600 mt-2">This month</p>
           </div>
@@ -184,7 +196,7 @@ export default function DashboardPage() {
               Total Expense
             </p>
             <h2 className="text-3xl font-bold text-red-900">
-              Rs{data.totalExpense?.toLocaleString() || "0"}
+              {formatCurrency(data.totalExpense || 0)}
             </h2>
             <p className="text-xs text-red-600 mt-2">This month</p>
           </div>
@@ -218,7 +230,7 @@ export default function DashboardPage() {
               Available Balance
             </p>
             <h2 className="text-3xl font-bold text-blue-900">
-              Rs{data.balance?.toLocaleString() || "0"}
+              {formatCurrency(data.balance || 0)}
             </h2>
             <p className="text-xs text-blue-600 mt-2">Liquid cash</p>
           </div>
@@ -419,7 +431,7 @@ export default function DashboardPage() {
                       Budget Allocated
                     </span>
                     <span className="text-2xl font-bold text-zinc-900">
-                      Rs{data.currentMonthBudget?.toLocaleString() || "0"}
+                      {formatCurrency(data.currentMonthBudget || 0)}
                     </span>
                   </div>
                   <div className="text-right">
@@ -427,7 +439,7 @@ export default function DashboardPage() {
                       Spent
                     </span>
                     <span className="text-2xl font-bold text-zinc-900">
-                      Rs{data.currentMonthExpense?.toLocaleString() || "0"}
+                      {formatCurrency(data.currentMonthExpense || 0)}
                     </span>
                   </div>
                 </div>
@@ -459,7 +471,7 @@ export default function DashboardPage() {
                     Budget
                   </p>
                   <p className="text-xl font-bold text-green-900">
-                    Rs{data.currentMonthBudget?.toLocaleString() || "0"}
+                    {formatCurrency(data.currentMonthBudget || 0)}
                   </p>
                 </div>
                 <div
@@ -473,7 +485,7 @@ export default function DashboardPage() {
                   <p
                     className={`text-xl font-bold ${usagePercent > 100 ? "text-red-900" : "text-orange-900"}`}
                   >
-                    Rs{data.currentMonthExpense?.toLocaleString() || "0"}
+                    {formatCurrency(data.currentMonthExpense || 0)}
                   </p>
                 </div>
               </div>
