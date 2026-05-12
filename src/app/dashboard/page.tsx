@@ -47,9 +47,14 @@ export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
 
   useEffect(() => {
-    API.get<DashboardData>("/dashboard/summary").then((res) =>
-      setData(res.data),
-    );
+    (async () => {
+      try {
+        const res = await API.get<DashboardData>("/dashboard/summary");
+        setData(res.data);
+      } catch (err) {
+        console.error("Failed to load dashboard summary:", err);
+      }
+    })();
   }, []);
 
   if (!data) return <div>Loading...</div>;
