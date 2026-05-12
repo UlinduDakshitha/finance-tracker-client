@@ -137,47 +137,56 @@ export default function BudgetsPage() {
           {editingId ? "Edit Budget" : "Add Budget"}
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-3">
           <input
-            className="border border-zinc-200 p-3 rounded-lg outline-none transition focus:border-black"
+            className="w-full border border-zinc-200 p-3 rounded-lg outline-none transition focus:border-black"
             placeholder="Category Name"
             value={form.categoryName}
             onChange={(e) => setForm({ ...form, categoryName: e.target.value })}
+            required
           />
 
           <input
-            className="border border-zinc-200 p-3 rounded-lg outline-none transition focus:border-black"
+            className="w-full border border-zinc-200 p-3 rounded-lg outline-none transition focus:border-black"
             placeholder="Amount"
             type="number"
+            step="0.01"
             value={form.amount}
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
+            required
           />
 
-          <select
-            className="border border-zinc-200 p-3 rounded-lg outline-none transition focus:border-black"
-            value={form.period}
-            onChange={(e) => setForm({ ...form, period: e.target.value })}
-          >
-            <option value="MONTHLY">MONTHLY</option>
-          </select>
+          <div className="grid grid-cols-3 gap-3">
+            <input
+              className="border border-zinc-200 p-3 rounded-lg outline-none transition focus:border-black"
+              type="number"
+              placeholder="Month"
+              min="1"
+              max="12"
+              value={form.month}
+              onChange={(e) => setForm({ ...form, month: e.target.value })}
+              required
+            />
 
-          <input
-            className="border border-zinc-200 p-3 rounded-lg outline-none transition focus:border-black"
-            type="number"
-            placeholder="Month"
-            min="1"
-            max="12"
-            value={form.month}
-            onChange={(e) => setForm({ ...form, month: e.target.value })}
-          />
+            <input
+              className="border border-zinc-200 p-3 rounded-lg outline-none transition focus:border-black"
+              type="number"
+              placeholder="Year"
+              value={form.year}
+              onChange={(e) => setForm({ ...form, year: e.target.value })}
+              required
+            />
 
-          <input
-            className="border border-zinc-200 p-3 rounded-lg outline-none transition focus:border-black"
-            type="number"
-            placeholder="Year"
-            value={form.year}
-            onChange={(e) => setForm({ ...form, year: e.target.value })}
-          />
+            <select
+              className="border border-zinc-200 p-3 rounded-lg outline-none transition focus:border-black"
+              value={form.period}
+              onChange={(e) => setForm({ ...form, period: e.target.value })}
+            >
+              <option value="MONTHLY">Monthly</option>
+              <option value="YEARLY">Yearly</option>
+              <option value="QUARTERLY">Quarterly</option>
+            </select>
+          </div>
         </div>
 
         <div className="flex gap-3">
