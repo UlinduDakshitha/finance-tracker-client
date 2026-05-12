@@ -63,11 +63,6 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    router.replace("/login");
-  };
-
   const formatCurrency = (value: number) =>
     `Rs ${value.toLocaleString("en-LK")}`;
 
@@ -125,13 +120,6 @@ export default function DashboardPage() {
                   {formatCurrency(data.balance || 0)}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 shadow-sm transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
-              >
-                Logout
-              </button>
             </div>
           </div>
         </div>
