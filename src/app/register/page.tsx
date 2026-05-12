@@ -4,6 +4,7 @@ import { useState } from "react";
 import API from "@/services/api";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import Link from "next/link";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -30,36 +31,50 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center bg-zinc-50 px-4">
       <form
         onSubmit={handleRegister}
-        className="w-full max-w-md space-y-4 p-6 border rounded-lg"
+        className="w-full max-w-md space-y-5 rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm"
       >
-        <h1 className="text-2xl font-bold">Register</h1>
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-bold text-zinc-900">Register</h1>
+          <p className="text-sm text-zinc-500">
+            Create your account to track income, expenses, and budgets.
+          </p>
+        </div>
         <input
-          className="w-full border p-2 rounded"
+          className="w-full rounded-lg border border-zinc-200 p-3 outline-none transition focus:border-black"
           type="text"
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <input
-          className="w-full border p-2 rounded"
+          className="w-full rounded-lg border border-zinc-200 p-3 outline-none transition focus:border-black"
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
-          className="w-full border p-2 rounded"
+          className="w-full rounded-lg border border-zinc-200 p-3 outline-none transition focus:border-black"
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button className="w-full bg-black text-white p-2 rounded">
+        <button className="w-full rounded-lg bg-black p-3 font-medium text-white transition hover:bg-zinc-800 hover:cursor-pointer">
           Register
         </button>
+        <p className="text-center text-sm text-zinc-600">
+          Already have an account?{" "}
+          <Link
+            href="/login"
+            className="font-medium text-black underline-offset-4 hover:underline hover:cursor-pointer"
+          >
+            Login
+          </Link>
+        </p>
       </form>
     </div>
   );
