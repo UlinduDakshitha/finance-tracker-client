@@ -43,6 +43,9 @@ export default function TransactionsPage() {
   const [filterCategory, setFilterCategory] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [categories, setCategories] = useState<
+    { id: number; name: string; type: string }[]
+  >([]);
 
   const formatAmount = (value: number) => `Rs ${value.toLocaleString("en-LK")}`;
 
@@ -69,11 +72,23 @@ export default function TransactionsPage() {
   };
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      void fetchTransactions();
-    }, 0);
+    const loadData = async () => {
+      try {
+        const [txRes, catRes] = await Promise.all([
+          API.get("/transactions"),
+          API.get("/categories"),
+        ]);
 
-    return () => clearTimeout(t);
+        setTransactions(txRes.data);
+        setCategories(catRes.data);
+      } catch {
+        alert("Failed to load data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -342,18 +357,32 @@ export default function TransactionsPage() {
               value={form.amount}
               onChange={(e) => setForm({ ...form, amount: e.target.value })}
             />
-            <input
-              className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 outline-none transition placeholder:text-zinc-400 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
-              placeholder="Category Name"
+            <select
+              className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
               value={form.categoryName}
               onChange={(e) =>
                 setForm({ ...form, categoryName: e.target.value })
               }
-            />
+            >
+              <option value="">Select Category</option>
+              {categories
+                .filter((c) => c.type === form.type)
+                .map((category) => (
+                  <option key={category.id} value={category.name}>
+                    {category.name}
+                  </option>
+                ))}
+            </select>
             <select
               className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
               value={form.type}
-              onChange={(e) => setForm({ ...form, type: e.target.value })}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  type: e.target.value,
+                  categoryName: "",
+                })
+              }
             >
               <option value="INCOME">INCOME</option>
               <option value="EXPENSE">EXPENSE</option>

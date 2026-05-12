@@ -38,6 +38,9 @@ export default function BudgetsPage() {
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [categories, setCategories] = useState<
+    { id: number; name: string; type: string }[]
+  >([]);
 
   const formatCurrency = (value: number) =>
     `Rs ${value.toLocaleString("en-LK")}`;
@@ -65,10 +68,23 @@ export default function BudgetsPage() {
   };
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      fetchBudgets();
-    }, 0);
-    return () => clearTimeout(t);
+    const loadData = async () => {
+      try {
+        const [budgetRes, catRes] = await Promise.all([
+          API.get("/budgets"),
+          API.get("/categories"),
+        ]);
+
+        setBudgets(budgetRes.data);
+        setCategories(catRes.data);
+      } catch {
+        alert("Failed to load budgets");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -234,14 +250,22 @@ export default function BudgetsPage() {
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-            <input
-              className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 outline-none transition placeholder:text-zinc-400 focus:border-emerald-400 focus:bg-white focus:ring-4 focus:ring-emerald-100"
-              placeholder="Category Name"
+            <select
+              className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 outline-none transition focus:border-emerald-400 focus:bg-white focus:ring-4 focus:ring-emerald-100"
               value={form.categoryName}
               onChange={(e) =>
                 setForm({ ...form, categoryName: e.target.value })
               }
-            />
+            >
+              <option value="">Select Category</option>
+              {categories
+                .filter((c) => c.type === "EXPENSE")
+                .map((category) => (
+                  <option key={category.id} value={category.name}>
+                    {category.name}
+                  </option>
+                ))}
+            </select>
 
             <input
               className="rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 outline-none transition placeholder:text-zinc-400 focus:border-emerald-400 focus:bg-white focus:ring-4 focus:ring-emerald-100"
