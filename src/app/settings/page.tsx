@@ -59,10 +59,17 @@ export default function SettingsPage() {
     setMessage("");
 
     try {
-      await API.put("/auth/profile", {
+      const res = await API.put<{ token?: string }>("/auth/profile", {
         name: profile.name,
         email: profile.email,
       });
+
+      // Update token if backend returns new one
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+        // Trigger storage event to update navbar
+        window.dispatchEvent(new Event("tokenUpdated"));
+      }
 
       setMessage("Profile updated successfully!");
       setTimeout(() => setMessage(""), 3000);

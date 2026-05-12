@@ -43,10 +43,18 @@ export default function Navbar() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      setProfile(decodeTokenProfile(token));
-    }
+    const loadProfile = () => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        setProfile(decodeTokenProfile(token));
+      }
+    };
+
+    loadProfile();
+
+    // Listen for token updates from settings page
+    window.addEventListener("tokenUpdated", loadProfile);
+    return () => window.removeEventListener("tokenUpdated", loadProfile);
   }, []);
 
   const handleLogout = () => {
