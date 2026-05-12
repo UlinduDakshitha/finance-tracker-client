@@ -1,6 +1,6 @@
-"use client";
+ "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import API from "@/services/api";
 import axios from "axios";
 
@@ -17,8 +17,14 @@ type Budget = {
   status: string;
 };
 
+type Category = {
+  id: number;
+  name: string;
+  type: string;
+};
+
 type FormState = {
-  categoryName: string;
+  categoryId: string;
   amount: string;
   period: string;
   month: string;
@@ -26,7 +32,7 @@ type FormState = {
 };
 
 const emptyForm: FormState = {
-  categoryName: "",
+  categoryId: "",
   amount: "",
   period: "MONTHLY",
   month: String(new Date().getMonth() + 1),
@@ -35,26 +41,39 @@ const emptyForm: FormState = {
 
 export default function BudgetsPage() {
   const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState<FormState>(emptyForm);
+  const [formData, setFormData] = useState<FormState>(emptyForm);
   const [editingId, setEditingId] = useState<number | null>(null);
 
+  const expenseCategories = useMemo(
+    () => categories.filter((c) => c.type === "EXPENSE"),
+    [categories],
+  );
+
   const fetchBudgets = async () => {
-    try {
-      const res = await API.get("/budgets");
-      setBudgets(res.data);
-    } catch {
-      alert("Failed to load budgets");
-    } finally {
-      setLoading(false);
-    }
+    const res = await API.get("/budgets");
+    setBudgets(Array.isArray(res.data) ? res.data : res.data?.data || []);
+  };
+
+  const fetchCategories = async () => {
+    const res = await API.get("/categories");
+    setCategories(Array.isArray(res.data) ? res.data : res.data?.data || []);
   };
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      fetchBudgets();
-    }, 0);
-    return () => clearTimeout(t);
+    const loadData = async () => {
+      try {
+        await Promise.all([fetchBudgets(), fetchCategories()]);
+      } catch (error) {
+        console.error(error);
+        alert("Failed to load data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,11 +81,17 @@ export default function BudgetsPage() {
 
     try {
       const payload = {
-        ...form,
-        amount: Number(form.amount),
-        month: Number(form.month),
-        year: Number(form.year),
+        categoryId: Number(formData.categoryId),
+        amount: Number(formData.amount),
+        period: formData.period,
+        month: Number(formData.month),
+        year: Number(formData.year),
       };
+
+      if (!payload.categoryId || Number.isNaN(payload.categoryId)) {
+        alert("Please select a valid expense category");
+        return;
+      }
 
       if (editingId) {
         await API.put(`/budgets/${editingId}`, payload);
@@ -74,28 +99,35 @@ export default function BudgetsPage() {
         await API.post("/budgets", payload);
       }
 
-      setForm(emptyForm);
+      setFormData(emptyForm);
       setEditingId(null);
-      fetchBudgets();
-    } catch (err: unknown) {
-      const message = axios.isAxiosError(err)
-        ? err.response?.data?.message ||
-          err.response?.data ||
+      await fetchBudgets();
+    } catch (error: unknown) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message ||
+          error.response?.data ||
           "Failed to save budget"
         : "Failed to save budget";
+
       alert(typeof message === "string" ? message : "Failed to save budget");
+      console.error(error);
     }
   };
 
   const handleEdit = (budget: Budget) => {
+    const matchedCategory = categories.find(
+      (category) => category.name === budget.categoryName && category.type === "EXPENSE",
+    );
+
     setEditingId(budget.id);
-    setForm({
-      categoryName: budget.categoryName,
+    setFormData({
+      categoryId: matchedCategory ? String(matchedCategory.id) : "",
       amount: String(budget.amount),
       period: budget.period,
       month: String(budget.month),
       year: String(budget.year),
     });
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -104,17 +136,20 @@ export default function BudgetsPage() {
 
     try {
       await API.delete(`/budgets/${id}`);
-      fetchBudgets();
-    } catch (err: unknown) {
-      const message = axios.isAxiosError(err)
-        ? err.response?.data?.message || err.response?.data || "Delete failed"
+      await fetchBudgets();
+    } catch (error: unknown) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message ||
+          error.response?.data ||
+          "Delete failed"
         : "Delete failed";
+
       alert(typeof message === "string" ? message : "Delete failed");
     }
   };
 
   const resetForm = () => {
-    setForm(emptyForm);
+    setFormData(emptyForm);
     setEditingId(null);
   };
 
@@ -138,21 +173,31 @@ export default function BudgetsPage() {
         </h2>
 
         <div className="space-y-3">
-          <input
+          <select
             className="w-full border border-zinc-200 p-3 rounded-lg outline-none transition focus:border-black"
-            placeholder="Category Name"
-            value={form.categoryName}
-            onChange={(e) => setForm({ ...form, categoryName: e.target.value })}
+            value={formData.categoryId}
+            onChange={(e) =>
+              setFormData({ ...formData, categoryId: e.target.value })
+            }
             required
-          />
+          >
+            <option value="">Select expense category</option>
+            {expenseCategories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
 
           <input
             className="w-full border border-zinc-200 p-3 rounded-lg outline-none transition focus:border-black"
             placeholder="Amount"
             type="number"
             step="0.01"
-            value={form.amount}
-            onChange={(e) => setForm({ ...form, amount: e.target.value })}
+            value={formData.amount}
+            onChange={(e) =>
+              setFormData({ ...formData, amount: e.target.value })
+            }
             required
           />
 
@@ -163,8 +208,10 @@ export default function BudgetsPage() {
               placeholder="Month"
               min="1"
               max="12"
-              value={form.month}
-              onChange={(e) => setForm({ ...form, month: e.target.value })}
+              value={formData.month}
+              onChange={(e) =>
+                setFormData({ ...formData, month: e.target.value })
+              }
               required
             />
 
@@ -172,15 +219,19 @@ export default function BudgetsPage() {
               className="border border-zinc-200 p-3 rounded-lg outline-none transition focus:border-black"
               type="number"
               placeholder="Year"
-              value={form.year}
-              onChange={(e) => setForm({ ...form, year: e.target.value })}
+              value={formData.year}
+              onChange={(e) =>
+                setFormData({ ...formData, year: e.target.value })
+              }
               required
             />
 
             <select
               className="border border-zinc-200 p-3 rounded-lg outline-none transition focus:border-black"
-              value={form.period}
-              onChange={(e) => setForm({ ...form, period: e.target.value })}
+              value={formData.period}
+              onChange={(e) =>
+                setFormData({ ...formData, period: e.target.value })
+              }
             >
               <option value="MONTHLY">Monthly</option>
               <option value="YEARLY">Yearly</option>
@@ -190,7 +241,10 @@ export default function BudgetsPage() {
         </div>
 
         <div className="flex gap-3">
-          <button className="bg-black text-white px-4 py-2 rounded-lg font-medium transition hover:bg-zinc-800 hover:cursor-pointer">
+          <button
+            type="submit"
+            className="bg-black text-white px-4 py-2 rounded-lg font-medium transition hover:bg-zinc-800 hover:cursor-pointer"
+          >
             {editingId ? "Update Budget" : "Add Budget"}
           </button>
 
@@ -205,6 +259,12 @@ export default function BudgetsPage() {
           )}
         </div>
       </form>
+
+      {expenseCategories.length === 0 && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          No EXPENSE categories found. Create one first from the Categories page.
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {budgets.map((budget) => (
@@ -271,12 +331,14 @@ export default function BudgetsPage() {
 
             <div className="flex gap-2 pt-2">
               <button
+                type="button"
                 onClick={() => handleEdit(budget)}
                 className="flex-1 bg-yellow-500 text-white px-3 py-2 rounded-lg font-medium text-sm transition hover:bg-yellow-600 hover:cursor-pointer"
               >
                 Edit
               </button>
               <button
+                type="button"
                 onClick={() => handleDelete(budget.id)}
                 className="flex-1 bg-red-500 text-white px-3 py-2 rounded-lg font-medium text-sm transition hover:bg-red-600 hover:cursor-pointer"
               >
