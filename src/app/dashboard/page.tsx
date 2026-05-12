@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import API from "@/services/api";
 import {
   BarChart,
@@ -44,40 +45,41 @@ type DashboardData = {
 };
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await API.get<DashboardData>("/dashboard/summary");
-        setData(res.data);
-      } catch (err) {
-        console.error("Failed to load dashboard summary:", err);
-      }
-    })();
-  }, []);
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.replace("/login");
+      return;
+    }
+
+    API.get("/dashboard/summary")
+      .then((res) => setData(res.data))
+      .catch(() => alert("Failed to load dashboard"))
+      .finally(() => setLoading(false));
+  }, [router]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.replace("/login");
+  };
+
+  if (loading) {
+    return <div className="p-6 text-lg">Loading dashboard...</div>;
+  }
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4 animate-pulse">
-            <svg
-              className="w-8 h-8 text-blue-600 animate-spin"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-          </div>
-          <p className="text-gray-600 font-medium">Loading your dashboard...</p>
-        </div>
+      <div className="p-6">
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <p className="mt-4 text-gray-600">
+          No financial data yet. Add categories and transactions to see summary
+          here.
+        </p>
       </div>
     );
   }
@@ -108,7 +110,7 @@ export default function DashboardPage() {
                 Dashboard
               </h1>
               <p className="text-zinc-600 mt-1">
-                Welcome back! Here's your financial overview.
+                Welcome back! Your financial overview awaits.
               </p>
             </div>
             <div className="text-right">
@@ -294,31 +296,35 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </div>
-            <div style={{ width: "100%", height: 350 }}>
-              <ResponsiveContainer>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    dataKey="amount"
-                    nameKey="categoryName"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={120}
-                    label={({ name, value }) => `${name}: Rs${value}`}
-                    labelLine
-                  >
-                    {pieData.map((_: CategoryExpense, index: number) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => `Rs${value}`} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+            {pieData.length === 0 ? (
+              <p className="text-gray-500">No expense data available.</p>
+            ) : (
+              <div style={{ width: "100%", height: 350 }}>
+                <ResponsiveContainer>
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      dataKey="amount"
+                      nameKey="categoryName"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={120}
+                      label={({ name, value }) => `${name}: Rs${value}`}
+                      labelLine
+                    >
+                      {pieData.map((_: CategoryExpense, index: number) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => `Rs${value}`} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </div>
 
           {/* Monthly Trend */}
@@ -501,70 +507,25 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </div>
-            <div className="space-y-2">
-              {(data.recentTransactions || [])
-                .slice(0, 5)
-                .map((tx: Transaction, idx: number) => (
+            <div className="space-y-4">
+              {(data.recentTransactions || []).length === 0 ? (
+                <p className="text-gray-500">No recent transactions yet.</p>
+              ) : (
+                (data.recentTransactions || []).map((tx: Transaction) => (
                   <div
                     key={tx.id}
-                    className={`flex items-center justify-between p-4 rounded-xl transition-all duration-300 hover:bg-zinc-50 border ${
-                      idx % 2 === 0 ? "border-transparent" : "border-zinc-100"
-                    } hover:border-zinc-200 hover:shadow-sm`}
+                    className="flex justify-between border-b pb-2"
                   >
-                    <div className="flex items-center gap-4 flex-1">
-                      <div
-                        className={`p-2 rounded-lg ${
-                          tx.type === "INCOME" ? "bg-green-100" : "bg-red-100"
-                        }`}
-                      >
-                        <svg
-                          className={`w-5 h-5 ${
-                            tx.type === "INCOME"
-                              ? "text-green-600"
-                              : "text-red-600"
-                          }`}
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-zinc-900 text-sm">
-                          {tx.title}
-                        </p>
-                        <p className="text-xs text-zinc-500">
-                          {tx.categoryName} • {tx.transactionDate}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p
-                        className={`font-bold text-sm ${tx.type === "INCOME" ? "text-green-600" : "text-red-600"}`}
-                      >
-                        {tx.type === "INCOME" ? "+" : "-"}Rs
-                        {typeof tx.amount === "number"
-                          ? tx.amount.toLocaleString()
-                          : tx.amount}
+                    <div>
+                      <p className="font-semibold">{tx.title}</p>
+                      <p className="text-sm text-gray-500">
+                        {tx.categoryName} • {tx.type} • {tx.transactionDate}
                       </p>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full inline-block mt-1 ${
-                          tx.type === "INCOME"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {tx.type}
-                      </span>
                     </div>
+                    <p className="font-bold">{tx.amount}</p>
                   </div>
-                ))}
+                ))
+              )}
             </div>
           </div>
         </div>
