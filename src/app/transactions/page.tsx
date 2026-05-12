@@ -173,22 +173,27 @@ export default function TransactionsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Transactions</h1>
+      <div>
+        <h1 className="text-3xl font-bold text-zinc-900">Transactions</h1>
+        <p className="text-sm text-zinc-500 mt-1">
+          Manage and track all your transactions
+        </p>
+      </div>
 
       {/* Filters */}
-      <div className="bg-white p-4 rounded shadow space-y-4">
-        <h2 className="text-xl font-semibold">Filters</h2>
+      <div className="bg-white p-6 rounded-lg border border-zinc-200 shadow-sm">
+        <h2 className="text-lg font-semibold text-zinc-900 mb-4">Filters</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           <input
-            className="border p-2 rounded"
+            className="border border-zinc-200 px-4 py-2 rounded-lg outline-none transition focus:border-black focus:shadow-sm"
             placeholder="Filter by category"
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
           />
 
           <select
-            className="border p-2 rounded"
+            className="border border-zinc-200 px-4 py-2 rounded-lg outline-none transition focus:border-black focus:shadow-sm bg-white"
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
           >
@@ -198,42 +203,44 @@ export default function TransactionsPage() {
           </select>
 
           <input
-            className="border p-2 rounded"
+            className="border border-zinc-200 px-4 py-2 rounded-lg outline-none transition focus:border-black focus:shadow-sm"
+            placeholder="mm/dd/yyyy"
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
           />
 
           <input
-            className="border p-2 rounded"
+            className="border border-zinc-200 px-4 py-2 rounded-lg outline-none transition focus:border-black focus:shadow-sm"
+            placeholder="mm/dd/yyyy"
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
           />
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={filterByType}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition hover:bg-blue-700 active:scale-95 shadow-sm"
           >
             Filter Type
           </button>
           <button
             onClick={filterByCategory}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition hover:bg-blue-700 active:scale-95 shadow-sm"
           >
             Filter Category
           </button>
           <button
             onClick={filterByDate}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium transition hover:bg-blue-700 active:scale-95 shadow-sm"
           >
             Filter Date
           </button>
           <button
             onClick={resetFilters}
-            className="bg-gray-600 text-white px-4 py-2 rounded"
+            className="bg-zinc-400 text-white px-4 py-2 rounded-lg font-medium transition hover:bg-zinc-500 active:scale-95 shadow-sm"
           >
             Reset
           </button>
@@ -243,34 +250,34 @@ export default function TransactionsPage() {
       {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-4 rounded shadow space-y-4"
+        className="bg-white p-6 rounded-lg border border-zinc-200 shadow-sm space-y-4"
       >
-        <h2 className="text-xl font-semibold">
+        <h2 className="text-lg font-semibold text-zinc-900">
           {editingId ? "Edit Transaction" : "Add Transaction"}
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
-            className="border p-2 rounded"
+            className="border border-zinc-200 px-4 py-2 rounded-lg outline-none transition focus:border-black focus:shadow-sm"
             placeholder="Title"
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
           />
           <input
-            className="border p-2 rounded"
+            className="border border-zinc-200 px-4 py-2 rounded-lg outline-none transition focus:border-black focus:shadow-sm"
             placeholder="Amount"
             type="number"
             value={form.amount}
             onChange={(e) => setForm({ ...form, amount: e.target.value })}
           />
           <input
-            className="border p-2 rounded"
+            className="border border-zinc-200 px-4 py-2 rounded-lg outline-none transition focus:border-black focus:shadow-sm"
             placeholder="Category Name"
             value={form.categoryName}
             onChange={(e) => setForm({ ...form, categoryName: e.target.value })}
           />
           <select
-            className="border p-2 rounded"
+            className="border border-zinc-200 px-4 py-2 rounded-lg outline-none transition focus:border-black focus:shadow-sm bg-white"
             value={form.type}
             onChange={(e) => setForm({ ...form, type: e.target.value })}
           >
@@ -278,7 +285,7 @@ export default function TransactionsPage() {
             <option value="EXPENSE">EXPENSE</option>
           </select>
           <input
-            className="border p-2 rounded"
+            className="border border-zinc-200 px-4 py-2 rounded-lg outline-none transition focus:border-black focus:shadow-sm"
             type="date"
             value={form.transactionDate}
             onChange={(e) =>
@@ -286,7 +293,7 @@ export default function TransactionsPage() {
             }
           />
           <input
-            className="border p-2 rounded"
+            className="border border-zinc-200 px-4 py-2 rounded-lg outline-none transition focus:border-black focus:shadow-sm"
             placeholder="Note"
             value={form.note}
             onChange={(e) => setForm({ ...form, note: e.target.value })}
@@ -294,7 +301,7 @@ export default function TransactionsPage() {
         </div>
 
         <div className="flex gap-3">
-          <button className="bg-black text-white px-4 py-2 rounded">
+          <button className="bg-black text-white px-6 py-2 rounded-lg font-medium transition hover:bg-zinc-800 active:scale-95 shadow-sm">
             {editingId ? "Update Transaction" : "Add Transaction"}
           </button>
 
@@ -302,7 +309,7 @@ export default function TransactionsPage() {
             <button
               type="button"
               onClick={resetForm}
-              className="bg-gray-500 text-white px-4 py-2 rounded"
+              className="bg-zinc-400 text-white px-6 py-2 rounded-lg font-medium transition hover:bg-zinc-500 active:scale-95 shadow-sm"
             >
               Cancel Edit
             </button>
@@ -311,36 +318,61 @@ export default function TransactionsPage() {
       </form>
 
       {/* Table */}
-      <div className="bg-white rounded shadow overflow-hidden">
+      <div className="bg-white rounded-lg border border-zinc-200 shadow-sm overflow-hidden">
         <table className="w-full">
-          <thead className="bg-gray-100">
+          <thead className="bg-zinc-50 border-b border-zinc-200">
             <tr>
-              <th className="p-3 text-left">Title</th>
-              <th className="p-3 text-left">Amount</th>
-              <th className="p-3 text-left">Category</th>
-              <th className="p-3 text-left">Type</th>
-              <th className="p-3 text-left">Date</th>
-              <th className="p-3 text-left">Action</th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-zinc-900">
+                Title
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-zinc-900">
+                Amount
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-zinc-900">
+                Category
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-zinc-900">
+                Type
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-zinc-900">
+                Date
+              </th>
+              <th className="px-6 py-3 text-left text-sm font-semibold text-zinc-900">
+                Action
+              </th>
             </tr>
           </thead>
           <tbody>
             {transactions.map((tx) => (
-              <tr key={tx.id} className="border-t">
-                <td className="p-3">{tx.title}</td>
-                <td className="p-3">{tx.amount}</td>
-                <td className="p-3">{tx.categoryName}</td>
-                <td className="p-3">{tx.type}</td>
-                <td className="p-3">{tx.transactionDate}</td>
-                <td className="p-3 flex gap-2">
+              <tr
+                key={tx.id}
+                className="border-b border-zinc-100 hover:bg-zinc-50 transition"
+              >
+                <td className="px-6 py-3 text-sm text-zinc-900">{tx.title}</td>
+                <td className="px-6 py-3 text-sm text-zinc-900">{tx.amount}</td>
+                <td className="px-6 py-3 text-sm text-zinc-600">
+                  {tx.categoryName}
+                </td>
+                <td className="px-6 py-3 text-sm">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${tx.type === "INCOME" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+                  >
+                    {tx.type}
+                  </span>
+                </td>
+                <td className="px-6 py-3 text-sm text-zinc-600">
+                  {tx.transactionDate}
+                </td>
+                <td className="px-6 py-3 flex gap-2">
                   <button
                     onClick={() => handleEdit(tx)}
-                    className="bg-yellow-500 text-white px-3 py-1 rounded"
+                    className="bg-blue-500 text-white px-3 py-1 rounded-lg text-sm font-medium transition hover:bg-blue-600 active:scale-95"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(tx.id)}
-                    className="bg-red-500 text-white px-3 py-1 rounded"
+                    className="bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-medium transition hover:bg-red-600 active:scale-95"
                   >
                     Delete
                   </button>
