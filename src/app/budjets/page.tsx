@@ -153,7 +153,7 @@ export default function BudgetsPage() {
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-zinc-50 to-emerald-50 pb-10">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-8">
-        <div className="overflow-hidden rounded-[2rem] border border-white/70 bg-white/80 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.35)] backdrop-blur">
+        <div className="overflow-hidden rounded-4xl border border-white/70 bg-white/80 shadow-[0_24px_80px_-32px_rgba(15,23,42,0.35)] backdrop-blur">
           <div className="relative px-6 py-7 sm:px-8 sm:py-8">
             <div className="absolute inset-0 bg-linear-to-r from-emerald-500/5 via-transparent to-cyan-500/10" />
             <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-emerald-300/20 blur-3xl" />
@@ -183,7 +183,7 @@ export default function BudgetsPage() {
               </div>
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:min-w-105">
-                <div className="rounded-3xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white px-4 py-4 shadow-sm">
+                <div className="rounded-3xl border border-blue-200 bg-linear-to-br from-blue-50 to-white px-4 py-4 shadow-sm">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">
                     Total Budget
                   </p>
@@ -191,7 +191,7 @@ export default function BudgetsPage() {
                     {formatCurrency(totalBudget)}
                   </p>
                 </div>
-                <div className="rounded-3xl border border-rose-200 bg-gradient-to-br from-rose-50 to-white px-4 py-4 shadow-sm">
+                <div className="rounded-3xl border border-rose-200 bg-linear-to-br from-rose-50 to-white px-4 py-4 shadow-sm">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-700">
                     Spent
                   </p>
@@ -199,7 +199,7 @@ export default function BudgetsPage() {
                     {formatCurrency(totalSpent)}
                   </p>
                 </div>
-                <div className="rounded-3xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white px-4 py-4 shadow-sm">
+                <div className="rounded-3xl border border-emerald-200 bg-linear-to-br from-emerald-50 to-white px-4 py-4 shadow-sm">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
                     Remaining
                   </p>
@@ -216,7 +216,7 @@ export default function BudgetsPage() {
 
         <form
           onSubmit={handleSubmit}
-          className="rounded-[2rem] border border-zinc-200 bg-white/95 p-6 shadow-sm sm:p-7"
+          className="rounded-4xl border border-zinc-200 bg-white/95 p-6 shadow-sm sm:p-7"
         >
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -297,7 +297,7 @@ export default function BudgetsPage() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {budgets.length === 0 ? (
-            <div className="col-span-full rounded-[2rem] border border-dashed border-zinc-200 bg-white/80 px-6 py-14 text-center shadow-sm">
+            <div className="col-span-full rounded-4xl border border-dashed border-zinc-200 bg-white/80 px-6 py-14 text-center shadow-sm">
               <div className="mx-auto max-w-sm">
                 <h3 className="text-lg font-semibold text-zinc-950">
                   No budgets yet
@@ -312,7 +312,7 @@ export default function BudgetsPage() {
             budgets.map((budget) => (
               <div
                 key={budget.id}
-                className="group rounded-[2rem] border border-zinc-200 bg-white/95 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-200/60"
+                className="group rounded-4xl border border-zinc-200 bg-white/95 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-200/60"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
