@@ -12,7 +12,7 @@ function decodeTokenProfile(token: string): Profile {
   try {
     const payload = token.split(".")[1];
     if (!payload) {
-      return { name: "Profile", email: "Signed in" };
+      return { name: "User", email: "" };
     }
 
     const parsed = JSON.parse(atob(payload)) as {
@@ -22,20 +22,24 @@ function decodeTokenProfile(token: string): Profile {
       username?: string;
     };
 
+    const email = parsed.email || parsed.sub || "";
+    const name =
+      parsed.name || parsed.username || (email ? email.split("@")[0] : "User");
+
     return {
-      name: parsed.name || parsed.username || parsed.email || "Profile",
-      email: parsed.email || parsed.sub || "Signed in",
+      name,
+      email,
     };
   } catch {
-    return { name: "Profile", email: "Signed in" };
+    return { name: "User", email: "" };
   }
 }
 
 export default function Navbar() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile>({
-    name: "Profile",
-    email: "Signed in",
+    name: "User",
+    email: "",
   });
 
   useEffect(() => {
@@ -66,7 +70,9 @@ export default function Navbar() {
             <p className="text-sm font-semibold text-gray-900">
               {profile.name}
             </p>
-            <p className="text-xs text-gray-500">{profile.email}</p>
+            {profile.email && (
+              <p className="text-xs text-gray-500">{profile.email}</p>
+            )}
           </div>
         </div>
 

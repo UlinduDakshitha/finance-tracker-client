@@ -23,9 +23,13 @@ function decodeTokenProfile(token: string): Profile {
       username?: string;
     };
 
+    const email = parsed.email || parsed.sub || "";
+    const name =
+      parsed.name || parsed.username || (email ? email.split("@")[0] : "");
+
     return {
-      name: parsed.name || parsed.username || "",
-      email: parsed.email || parsed.sub || "",
+      name,
+      email,
     };
   } catch {
     return { name: "", email: "" };
